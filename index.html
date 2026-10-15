@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>O Atendimento - Caça às Ervas | Terreiro</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: #080d1a;
+            color: #f3f4f6;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .header-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #d4af37;
+            object-fit: cover;
+        }
+        h1 { color: #d4af37; margin: 0; font-size: 1.2rem; }
+        p.subtitle { color: #10b981; font-size: 0.85rem; margin: 2px 0 0 0; font-weight: bold; }
+        
+        .card-panel {
+            background: #111827;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #d4af37;
+            background: #1f2937;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .btn {
+            background: #d4af37;
+            color: #0b131f;
+            border: none;
+            padding: 12px 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #f59e0b; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .game-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1f2937;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #d4af37;
+            font-size: 0.9rem;
+        }
+
+        .consulente-box {
+            background: #0b131f;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .consulente-avatar {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 2px solid #10b981;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .consulente-texto h3 { margin: 0 0 5px 0; color: #10b981; font-size: 1rem; }
+        .consulente-texto p { margin: 0; font-size: 0.9rem; line-height: 1.4; color: #e5e7eb; }
+
+        .section-title { font-size: 0.95rem; color: #d4af37; margin-bottom: 8px; font-weight: bold; }
+        
+        .modalidades-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .mod-card {
+            background: #1f2937;
+            border: 2px solid #374151;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #fff;
+            transition: all 0.2s;
+        }
+        .mod-card.selected { border-color: #10b981; background: #064e3b; }
+
+        .ervas-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 4px;
+        }
+        .erva-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .erva-card.selected { border-color: #d4af37; background: #374151; color: #d4af37; font-weight: bold; }
+
+        .help-container {
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: #111827;
+            border: 2px solid #d4af37;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+        .guia-pista-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+            background: #1f2937;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #d4af37;
+            margin-top: 10px;
+        }
+        .guia-pista-img {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #d4af37;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <img src="https://i.ibb.co/60wpJ3xG/Logo-terreiro.jpg" class="header-logo" alt="Logo Terreiro">
+        <div>
+            <h1>O Atendimento - Caça às Ervas</h1>
+            <p class="subtitle">Simulador de Consulta e Fundamentos</p>
+        </div>
+    </div>
+
+    <div class="card-panel">
+        <!-- TELA DE INÍCIO -->
+        <div id="screen-start" class="screen active">
+            <h2 style="color: #d4af37; margin-top: 0;">Bem-vindo ao Plantão</h2>
+            <p>Digite seu nome ou apelido de médium para iniciar os atendimentos espirituais:</p>
+            <input type="text" id="playerName" placeholder="Nome do Médium..." maxlength="20">
+            <button class="btn" onclick="iniciarJogo()">Abrir Porteira e Iniciar</button>
+        </div>
+
+        <!-- TELA DE ATENDIMENTO -->
+        <div id="screen-game" class="screen">
+            <div class="game-status">
+                <div><strong>Médium:</strong> <span id="dispPlayer" style="color:#d4af37;"></span></div>
+                <div>✨ Axé: <strong id="dispScore" style="color:#10b981;">0</strong></div>
+                <div>🌿 Atendimento: <strong id="dispCount" style="color:#fbbf24;">1</strong></div>
+            </div>
+
+            <div class="consulente-box">
+                <img id="consAvatar" src="" class="consulente-avatar" alt="Consulente">
+                <div class="consulente-texto">
+                    <h3 id="consName">Nome do Consulente</h3>
+                    <p id="consRelato">Carregando relato...</p>
+                </div>
+            </div>
+
+            <div class="section-title">1. O que você recomenda para o(a) consulente? (Pode escolher mais de uma)</div>
+            <div class="modalidades-grid">
+                <div class="mod-card" id="mod-banho" onclick="toggleModalidade('banho')">🛁 Banho</div>
+                <div class="mod-card" id="mod-cha" onclick="toggleModalidade('cha')">🍵 Chá</div>
+                <div class="mod-card" id="mod-defumacao" onclick="toggleModalidade('defumacao')">💨 Defumação</div>
+            </div>
+
+            <div class="section-title">2. Selecione as Ervas e Elementos Necessários:</div>
+            <div class="ervas-grid" id="ervasGrid"></div>
+
+            <div class="help-container">
+                <button class="btn" style="background:#1f2937; color:#d4af37; border:1px solid #d4af37;" onclick="consultarGuia()">💡 Pedir Conselho a uma Entidade (Guia)</button>
+            </div>
+
+            <button class="btn" id="btnFinalizar" onclick="avaliarAtendimento()" disabled>Realizar Atendimento</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE RESULTADO / PISTA -->
+    <div class="modal" id="gameModal">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="color: #d4af37; margin-top: 0;"></h3>
+            <div id="modalBody" style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 15px;"></div>
+            <button class="btn" onclick="fecharModal()" id="modalBtn">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        // 10 CONSULENTES COM FOTOS REAIS DE PESSOAS DIFERENTES
+        const bancoConsulentes = [
+            { name: "Bruna", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150", relato: "Sinto um peso terrível nas costas, dores nos ombros e muita tristeza sem motivo aparente ao chegar em casa." },
+            { name: "Pedro", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", relato: "Meu comércio tá travado, os fregueses somem e o ambiente lá dentro parece pesado demais." },
+            { name: "Emilia", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", relato: "Não consigo dormir direito, minha mente não para, fico muito ansiosa e acordo esgotada." },
+            { name: "Carlos", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", relato: "Sinto minha energia baixa, falta de foco e uma tontura estranha quando converso com certas pessoas." },
+            { name: "Beatriz", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", relato: "O clima na minha casa tá insuportável, brigas por qualquer bobagem e ar irrespirável." },
+            { name: "Marcos", img: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150", relato: "Estou passando por uma fase de exaustão mental profunda e sinto que preciso de clareza nas ideias." },
+            { name: "Juliana", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150", relato: "Me sinto drenada energeticamente, como se estivessem sugando minhas forças no trabalho." },
+            { name: "Seu João", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150", relato: "Caminhos fechados, portas que se fecham na minha cara e uma sensação constante de azar." },
+            { name: "Fernanda", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150", relato: "Angústia no peito que não passa, choro fácil e nervosismo com qualquer barulho." },
+            { name: "Roberto", img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150", relato: "Sensação de perseguição e um frio na espinha constante quando fico sozinho em casa." }
+        ];
+
+        const bancoErvas = [
+            { id: "guine", name: "Guiné", tipo: "defesa" },
+            { id: "espada", name: "Espada de São Jorge", tipo: "defesa" },
+            { id: "alecrim", name: "Alecrim", tipo: "harmonia" },
+            { id: "hortela", name: "Hortelã", tipo: "calma" },
+            { id: "camomila", name: "Camomila", tipo: "calma" },
+            { id: "eucalipto", name: "Eucalipto", tipo: "limpeza" },
+            { id: "arruda", name: "Arruda", tipo: "defesa" },
+            { id: "manjericao", name: "Manjericão", tipo: "harmonia" }
+        ];
+
+        // ENTIDADES GUIA COM DICAS INDIRETAS E ENIGMÁTICAS
+        const entidadesGuia = [
+            { name: "Preto Velho", img: "https://i.ibb.co/k6GfJWrY/preto-velho.jpg", pista: "Meu filho, para tirar o peso dos ombros e a carga densa do corpo, procure a folha de cheiro marcante." },
+            { name: "Caboclo", img: "https://i.ibb.co/6RdKhHD0/caboclo.jpg", pista: "Na mata sagrada, as folhas em formato de agulha traz o alinhamento da mente e limpa o campo de quem anda disperso." },
+            { name: "Boiadeiro", img: "https://i.ibb.co/5gLgyczK/boiadeiro.jpg", pista: "Para espantar demanda pesada e limpar os cantos da casa, a fumaça que lembra o cheiro do alho e a erva de cheiro fresco é certeira na lida!" },
+            { name: "Cigana", img: "https://i.ibb.co/Sw3KpbGY/cigana.jpg", pista: "Para acalmar o coração aflito e trazer leveza ao espírito, use ervas suaves que trazem paz ao pensamento." },
+            { name: "Baiano", img: "https://i.ibb.co/FbKVVDNH/baianos.jpg", pista: "Meu irmão, ânimo renovado pede erva cheirosa e firmeza na cabeça para espantar qualquer zica!" }
+        ];
+
+        let playerName = "";
+        let score = 0;
+        let atendimentoCount = 1;
+        let atualConsulente = null;
+        let modalidadesSelecionadas = { banho: false, cha: false, defumacao: false };
+        let ervasSelecionadas = [];
+
+        function iniciarJogo() {
+            playerName = document.getElementById('playerName').value.trim();
+            if(!playerName) { alert("Por favor, digite seu nome de médium!"); return; }
+            document.getElementById('dispPlayer').textContent = playerName;
+            document.getElementById('screen-start').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            proximoAtendimento();
+        }
+
+        function proximoAtendimento() {
+            modalidadesSelecionadas = { banho: false, cha: false, defumacao: false };
+            ervasSelecionadas = [];
+            document.querySelectorAll('.mod-card').forEach(c => c.classList.remove('selected'));
+            
+            // Sorteio randômico do consulente
+            atualConsulente = bancoConsulentes[Math.floor(Math.random() * bancoConsulentes.length)];
+            document.getElementById('consName').textContent = atualConsulente.name;
+            document.getElementById('consAvatar').src = atualConsulente.img;
+            document.getElementById('consRelato').textContent = atualConsulente.relato;
+            document.getElementById('dispCount').textContent = atendimentoCount;
+
+            renderErvas();
+            validarFormulario();
+        }
+
+        function toggleModalidade(mod) {
+            modalidadesSelecionadas[mod] = !modalidadesSelecionadas[mod];
+            document.getElementById(`mod-${mod}`).classList.toggle('selected', modalidadesSelecionadas[mod]);
+            validarFormulario();
+        }
+
+        function renderErvas() {
+            const grid = document.getElementById('ervasGrid');
+            grid.innerHTML = '';
+            let ervasEmbaralhadas = [...bancoErvas].sort(() => Math.random() - 0.5);
+            ervasEmbaralhadas.forEach(erva => {
+                const div = document.createElement('div');
+                div.className = `erva-card ${ervasSelecionadas.includes(erva.name) ? 'selected' : ''}`;
+                div.innerHTML = `<span>🌿 ${erva.name}</span> <small>${ervasSelecionadas.includes(erva.name) ? '✔' : '+'}</small>`;
+                div.onclick = () => toggleErva(erva.name, div);
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleErva(nome, el) {
+            if(ervasSelecionadas.includes(nome)) {
+                ervasSelecionadas = ervasSelecionadas.filter(e => e !== nome);
+                el.classList.remove('selected');
+            } else {
+                ervasSelecionadas.push(nome);
+                el.classList.add('selected');
+            }
+            renderErvas();
+            validarFormulario();
+        }
+
+        // SORTEIO RANDÔMICO DA ENTIDADE PARA DAR A DICA
+        function consultarGuia() {
+            const guiaSorteado = entidadesGuia[Math.floor(Math.random() * entidadesGuia.length)];
+            let html = `
+                <div class="guia-pista-box">
+                    <img src="${guiaSorteado.img}" class="guia-pista-img">
+                    <div>
+                        <strong style="color: #d4af37; display: block; margin-bottom: 4px;">${guiaSorteado.name} diz:</strong>
+                        <p style="margin: 0; font-size: 0.85rem; color: #e5e7eb; font-style: italic;">"${guiaSorteado.pista}"</p>
+                    </div>
+                </div>
+            `;
+            mostrarModal("💡 Orientação Espiritual", html);
+        }
+
+        function validarFormulario() {
+            const temMod = modalidadesSelecionadas.banho || modalidadesSelecionadas.cha || modalidadesSelecionadas.defumacao;
+            const temErva = ervasSelecionadas.length > 0;
+            document.getElementById('btnFinalizar').disabled = !(temMod && temErva);
+        }
+
+        function avaliarAtendimento() {
+            let acerto = ervasSelecionadas.length >= 1 && (modalidadesSelecionadas.banho || modalidadesSelecionadas.defumacao);
+            
+            if(acerto) {
+                score += 100;
+                document.getElementById('dispScore').textContent = score;
+                atendimentoCount++;
+                mostrarModal("✨ Atendimento Realizado com Sucesso!", 
+                    `<p>O(a) consulente <strong>${atualConsulente.name}</strong> sentiu alívio imediato e o campo energético foi reequilibrado com Axé!</p>
+                     <p style="color:#10b981; font-weight:bold;">+100 Pontos de Axé</p>`,
+                    () => proximoAtendimento());
+            } else {
+                mostrarModal("⚠️ Atenção aos Fundamentos", 
+                    `<p>A escolha das ervas ou modalidades não foi totalmente adequada para o alívio deste caso. Peça conselho aos guias para compreender melhor a necessidade do consulente!</p>`,
+                    () => {});
+            }
+        }
+
+        function mostrarModal(titulo, html, callback) {
+            document.getElementById('modalTitle').textContent = titulo;
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('gameModal').style.display = 'flex';
+            window.modalCallback = callback;
+        }
+
+        function fecharModal() {
+            document.getElementById('gameModal').style.display = 'none';
+            if(window.modalCallback) {
+                window.modalCallback();
+                window.modalCallback = null;
+            }
+        }
+    </script>
+</body>
+</html>
